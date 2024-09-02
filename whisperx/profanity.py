@@ -2,7 +2,7 @@ from profanity_check import predict, predict_prob
 import string
 
 
-
+set_comp = {'motherfucker', 'asshat', 'shitface', 'dogshit'}
 def remove_compounds(result, compound_words):
     print('before', result)
     
@@ -20,7 +20,7 @@ def remove_compounds(result, compound_words):
         for i, word in enumerate(words):
             # Check if the word is in the compounded swearing set
             # if we want to support more languages we need a swearing set, probably...
-            if predict([word])[0]:
+            if word in set_comp:
                 print('profanity', word)
                 # Skip if the word is an exact match with any word in compound_words_set
                 if word in compound_words_set:
