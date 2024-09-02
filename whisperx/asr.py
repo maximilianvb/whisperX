@@ -176,7 +176,7 @@ class FasterWhisperPipeline(Pipeline):
         return final_iterator
 
     def transcribe(
-        self, audio: Union[str, np.ndarray], batch_size=None, num_workers=0, language=None, task=None, chunk_size=30, print_progress = False, combined_progress=False
+        self, audio: Union[str, np.ndarray], compound_words: str = "", batch_size=None, num_workers=0, language=None, task=None, chunk_size=30, print_progress = False, combined_progress=False
     ) -> TranscriptionResult:
         if isinstance(audio, str):
             audio = load_audio(audio)
@@ -244,7 +244,7 @@ class FasterWhisperPipeline(Pipeline):
         if self.suppress_numerals:
             self.options = self.options._replace(suppress_tokens=previous_suppress_tokens)
 
-        if self.compound_words != "":
+        if compound_words != "":
             segments = remove_compounds(segments, self.compound_words)
 
         return {"segments": segments, "language": language}
