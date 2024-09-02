@@ -5,6 +5,7 @@ import warnings
 
 import numpy as np
 import torch
+import re
 
 from .alignment import align, load_align_model
 from .asr import load_model
@@ -12,7 +13,66 @@ from .audio import load_audio
 from .diarize import DiarizationPipeline, assign_word_speakers
 from .utils import (LANGUAGES, TO_LANGUAGE_CODE, get_writer, optional_float,
                     optional_int, str2bool)
+import string
 
+
+
+import string
+
+
+compounded_swearing = {'motherfucker', 'asshat', 'shitface', 'dogshit', 'fucking'}
+
+def remove_compounds(result, compound_words):
+    print('before', result)
+    
+    # Convert compound words to lowercase and remove punctuation
+    compound_words_cleaned = compound_words.lower().translate(str.maketrans('', '', string.punctuation))
+    compound_words_set = set(compound_words_cleaned.split())
+    
+    # Iterate over each segment and replace compounded words
+    for segment in result['segments']:
+        # Convert text to lowercase and remove punctuation
+        text = segment['text']
+        text_no_punct = text.lower().translate(str.maketrans('', '', string.punctuation))
+        
+        words = text_no_punct.split()
+        for i, word in enumerate(words):
+            # Check if the word is in the compounded swearing set
+            if word in compounded_swearing:
+                # Skip if the word is an exact match with any word in compound_words_set
+                if word in compound_words_set:
+                    continue
+                
+                # Find all substrings from compound_words_set that are in the word
+                substrings = sorted([sub for sub in compound_words_set if sub in word], key=len, reverse=True)
+                
+                if substrings:
+                    # Split the word based on all found substrings
+                    parts = []
+                    last_end = 0
+                    for substring in substrings:
+                        start = word.index(substring, last_end)
+                        if start > last_end:
+                            parts.append(word[last_end:start])
+                        parts.append(substring)
+                        last_end = start + len(substring)
+                    if last_end < len(word):
+                        parts.append(word[last_end:])
+                    
+                    # Remove empty parts and join with spaces
+                    replacement = ' '.join(filter(bool, parts))
+                    
+                    # Replace in text_no_punct
+                    text_no_punct = text_no_punct.replace(word, replacement, 1)
+                    print(f"Replaced '{word}' with '{replacement}'")
+        
+        # Update the segment text with the modified version
+        segment['text'] = text_no_punct
+    
+    print('after', result)
+    return result
+
+    
 
 def cli():
     # fmt: off
@@ -88,6 +148,7 @@ def cli():
     device: str = args.pop("device")
     device_index: int = args.pop("device_index")
     compute_type: str = args.pop("compute_type")
+    compound_words: str = args.pop("compound_words")
 
     # model_flush: bool = args.pop("model_flush")
     os.makedirs(output_dir, exist_ok=True)
@@ -167,15 +228,16 @@ def cli():
     # Part 1: VAD & ASR Loop
     results = []
     tmp_results = []
-    # model = load_model(model_name, device=device, download_root=model_dir)
-    #model = load_model(model_name, device=device, device_index=device_index, download_root=model_dir, compute_type=compute_type, language=args['language'], asr_options=asr_options, vad_options={"vad_onset": vad_onset, "vad_offset": vad_offset}, task=task, threads=faster_whisper_threads)
+    #model = load_model(model_name, device=device, download_root=model_dir)
+    model = load_model(model_name, device=device, device_index=device_index, download_root=model_dir, compute_type=compute_type, language=args['language'], asr_options=asr_options, vad_options={"vad_onset": vad_onset, "vad_offset": vad_offset}, task=task, threads=faster_whisper_threads)
 
     for audio_path in args.pop("audio"):
         audio = load_audio(audio_path)
         # >> VAD & ASR
         print(">>Performing transcription...")
-        #result = model.transcribe(audio, batch_size=batch_size, chunk_size=chunk_size, print_progress=print_progress)
-        result = {"segments": [{"text": "motherfucker motherfucker", "start": 0.0, "end": 5.0}]}
+        result = model.transcribe(audio, batch_size=batch_size, chunk_size=chunk_size, print_progress=print_progress)
+        if compound_words != "" and compound_words is not None:
+            result = remove_compounds(result, compound_words)
         results.append((result, audio_path))
 
 
@@ -226,7 +288,6 @@ def cli():
             results.append((result, input_audio_path))
     # >> Write
     for result, audio_path in results:
-        print(result)
         result["language"] = align_language
         writer(result, audio_path, writer_args)
 
