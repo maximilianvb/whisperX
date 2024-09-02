@@ -13,6 +13,8 @@ from .audio import N_SAMPLES, SAMPLE_RATE, load_audio, log_mel_spectrogram
 from .vad import load_vad_model, merge_chunks
 from .types import TranscriptionResult, SingleSegment
 
+from .profanity import remove_compounds
+
 def find_numeral_symbol_tokens(tokenizer):
     numeral_symbol_tokens = []
     for i in range(tokenizer.eot):
@@ -104,6 +106,7 @@ class FasterWhisperPipeline(Pipeline):
             framework = "pt",
             language : Optional[str] = None,
             suppress_numerals: bool = False,
+            compound_words: str = "",
             **kwargs
     ):
         self.model = model
@@ -239,6 +242,9 @@ class FasterWhisperPipeline(Pipeline):
         if self.suppress_numerals:
             self.options = self.options._replace(suppress_tokens=previous_suppress_tokens)
 
+        if self.compound_words != "" or self.compound_words is not None:
+            segments = remove_compounds(segments, self.compound_words)
+
         return {"segments": segments, "language": language}
 
 
@@ -267,7 +273,8 @@ def load_model(whisper_arch,
                model : Optional[WhisperModel] = None,
                task="transcribe",
                download_root=None,
-               threads=4):
+               threads=4,
+               compound_words=""):
     '''Load a Whisper model for inference.
     Args:
         whisper_arch: str - The name of the Whisper model to load.
@@ -354,4 +361,5 @@ def load_model(whisper_arch,
         language=language,
         suppress_numerals=suppress_numerals,
         vad_params=default_vad_options,
+        compound_word=compound_words,
     )
