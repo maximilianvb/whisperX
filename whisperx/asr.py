@@ -362,5 +362,5 @@ def load_model(whisper_arch,
         language=language,
         suppress_numerals=suppress_numerals,
         vad_params=default_vad_options,
-        compound_word=compound_words,
+        compound_words=compound_words,
     )
