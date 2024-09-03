@@ -244,7 +244,7 @@ class FasterWhisperPipeline(Pipeline):
         if self.suppress_numerals:
             self.options = self.options._replace(suppress_tokens=previous_suppress_tokens)
 
-        if compound_words != "":
+        if self.compound_words != "":
             segments = remove_compounds(segments, self.compound_words)
 
         return {"segments": segments, "language": language}

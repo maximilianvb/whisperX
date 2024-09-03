@@ -3,15 +3,14 @@ import string
 
 
 set_comp = {'motherfucker', 'asshat', 'shitface', 'dogshit'}
-def remove_compounds(result, compound_words):
-    print('before', result)
+def remove_compounds(segments, compound_words):
     
     # Convert compound words to lowercase and remove punctuation
     compound_words_cleaned = compound_words.lower().translate(str.maketrans('', '', string.punctuation))
     compound_words_set = set(compound_words_cleaned.split())
     
     # Iterate over each segment and replace compounded words
-    for segment in result['segments']:
+    for segment in segments:
         # Convert text to lowercase and remove punctuation
         text = segment['text']
         text_no_punct = text.lower().translate(str.maketrans('', '', string.punctuation))
@@ -52,5 +51,4 @@ def remove_compounds(result, compound_words):
         # Update the segment text with the modified version
         segment['text'] = text_no_punct
     
-    print('after', result)
-    return result
+    return segments
