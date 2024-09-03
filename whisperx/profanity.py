@@ -1,8 +1,11 @@
 from profanity_check import predict, predict_prob
 import string
+import os
 
 def build_set_profanities():
-    with open('profanity_wordlist.txt', 'r') as file:
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    file_path = os.path.join(script_dir, 'profanity_wordlist.txt')
+    with open(file_path, 'r') as file:
         return set(word.strip().lower() for word in file)
 
 set_comp = build_set_profanities()
