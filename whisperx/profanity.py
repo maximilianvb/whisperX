@@ -1,8 +1,11 @@
 from profanity_check import predict, predict_prob
 import string
 
+def build_set_profanities():
+    with open('profanity_wordlist.txt', 'r') as file:
+        return set(word.strip().lower() for word in file)
 
-set_comp = {'motherfucker', 'asshat', 'shitface', 'dogshit'}
+set_comp = build_set_profanities()
 def remove_compounds(segments, compound_words):
     
     # Convert compound words to lowercase and remove punctuation
@@ -20,7 +23,7 @@ def remove_compounds(segments, compound_words):
             print(predict_prob([word]))
             # Check if the word is in the compounded swearing set
             # if we want to support more languages we need a swearing set, probably...
-            if word in set_comp:
+            if word in set_comp or predict([word])[0]:
                 print('profanity', word)
                 # Skip if the word is an exact match with any word in compound_words_set
                 if word in compound_words_set:
