@@ -180,8 +180,6 @@ def cli():
         # >> VAD & ASR
         print(">>Performing transcription...")
         result = model.transcribe(audio, batch_size=batch_size, chunk_size=chunk_size, print_progress=print_progress)
-        if compound_words != "" and compound_words is not None:
-            result = remove_compounds(result, compound_words)
         results.append((result, audio_path))
 
 
