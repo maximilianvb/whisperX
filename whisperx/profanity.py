@@ -29,20 +29,14 @@ def remove_compounds(segments, compound_words):
                 substrings = sorted([sub for sub in compound_words_set if sub in word], key=len, reverse=True)
                 
                 if substrings:
-                    # Split the word based on all found substrings
-                    parts = []
-                    last_end = 0
-                    for substring in substrings:
-                        start = word.index(substring, last_end)
-                        if start > last_end:
-                            parts.append(word[last_end:start])
-                        parts.append(substring)
-                        last_end = start + len(substring)
-                    if last_end < len(word):
-                        parts.append(word[last_end:])
+                    # Use only the first (longest) matching substring
+                    substring = substrings[0]
                     
-                    # Remove empty parts and join with spaces
-                    replacement = ' '.join(filter(bool, parts))
+                    # Split the word based on the found substring
+                    parts = word.split(substring)
+                    
+                    # Join parts with the substring and spaces
+                    replacement = f" {substring} ".join(filter(bool, parts))
                     
                     # Replace in text_no_punct
                     text_no_punct = text_no_punct.replace(word, replacement, 1)
