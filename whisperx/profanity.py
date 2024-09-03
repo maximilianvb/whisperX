@@ -23,7 +23,6 @@ def remove_compounds(segments, compound_words):
         
         words = text_no_punct.split()
         for i, word in enumerate(words):
-            print(predict_prob([word]))
             # Check if the word is in the compounded swearing set
             # if we want to support more languages we need a swearing set, probably...
             if word in set_comp or predict([word])[0]:
