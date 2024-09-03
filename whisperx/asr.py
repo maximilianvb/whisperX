@@ -111,7 +111,6 @@ class FasterWhisperPipeline(Pipeline):
     ):
         self.model = model
         self.compound_words = compound_words
-        print('compound_words', compound_words)
         self.tokenizer = tokenizer
         self.options = options
         self.preset_language = language
