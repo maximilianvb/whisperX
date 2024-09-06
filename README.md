@@ -28,6 +28,14 @@
 
 <!-- <h2 align="left", id="what-is-it">What is it 🔎</h2> -->
 
+Run commands (cheatsheet):
+conda activate whisperx
+whisperx examples/test2.MOV --compound_words "shit ass fuck" --compute_type int8
+
+compound words to test: "shit face" as in we include both words from a swearword
+same word but longer like "fuck fucker"
+use test.py which you need to run in the whisperx folder with command python test.py
+
 This repository provides fast automatic speech recognition (70x realtime with large-v2) with word-level timestamps and speaker diarization.
 
 - ⚡️ Batched inference for 70x realtime transcription using whisper large-v2

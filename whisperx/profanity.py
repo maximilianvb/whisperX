@@ -31,6 +31,15 @@ def remove_compounds(segments, compound_words):
                 
                 # Split the word using the regex pattern
                 parts = re.split(f'({pattern})', word)
+
+                # remove any parts that are <= 2 characters
+                if len(parts) > 1:
+                    for i, part in enumerate(parts):
+                        if i == 0:
+                            continue
+                        elif len(part) <= 2:
+                            parts[i-1] = ''.join(parts[i-1:i+1])
+                            parts.pop(i)
                 
                 # Filter out empty strings and join with spaces
                 replacement = ' '.join(filter(bool, parts))
